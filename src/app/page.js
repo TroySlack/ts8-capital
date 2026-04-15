@@ -49,78 +49,61 @@ const DEFAULT_PORTFOLIO = {
   "Daytrading": { accountValue: 0, holdings: [], trades: [] },
 };
 
+// Real trades imported from Fidelity — same-day round trips only (daytrading)
 const DEFAULT_JOURNAL = [
   {
-    id: 1, date: "2026-04-01", ticker: "SPY", direction: "LONG",
-    entryPrice: 555.00, exitPrice: 557.50, shares: 50, stopLoss: 553.50,
-    riskAmount: 75, pnl: 125, rMultiple: 1.67,
-    setup: "VWAP Reclaim",
-    entryReason: "Clean reclaim of VWAP after early morning dip with strong volume confirmation on 5-min chart",
-    exitReason: "Hit initial 2R target, scaled out then trailed stop on remainder",
+    id: 1, date: "2026-04-14", ticker: "TQQQ", direction: "LONG",
+    entryPrice: 53.03, exitPrice: 53.24, shares: 4.67, stopLoss: 0,
+    riskAmount: 0, pnl: 0.98, rMultiple: 0,
+    setup: "Other",
+    entryReason: "", exitReason: "",
     emotion: "Calm", marketCondition: "Trending Up",
-    mistakes: "Took partial profits slightly too early — left some on the table",
-    lessons: "VWAP reclaims with volume work well in trending conditions. Trust the process and hold to targets.",
-    grade: "A",
+    mistakes: "", lessons: "", grade: "B",
   },
   {
-    id: 2, date: "2026-04-02", ticker: "NVDA", direction: "LONG",
-    entryPrice: 875.00, exitPrice: 862.50, shares: 10, stopLoss: 870.00,
-    riskAmount: 50, pnl: -125, rMultiple: -2.5,
-    setup: "Momentum Scalp",
-    entryReason: "Chased a breakout that had already extended — FOMO entry well above the base",
-    exitReason: "Stopped out below support, held too long hoping for recovery",
-    emotion: "FOMO", marketCondition: "Choppy",
-    mistakes: "Chased the move, didn't wait for a clean setup. Added to a loser briefly.",
-    lessons: "Never chase extended moves. If you missed the entry, wait for the pullback. The setup will repeat.",
-    grade: "D",
+    id: 2, date: "2026-04-14", ticker: "QQQ", direction: "LONG",
+    entryPrice: 626.60, exitPrice: 627.25, shares: 0.8, stopLoss: 0,
+    riskAmount: 0, pnl: 0.52, rMultiple: 0,
+    setup: "Other",
+    entryReason: "", exitReason: "",
+    emotion: "Calm", marketCondition: "Trending Up",
+    mistakes: "", lessons: "", grade: "B",
   },
   {
-    id: 3, date: "2026-04-03", ticker: "QQQ", direction: "SHORT",
-    entryPrice: 448.50, exitPrice: 445.00, shares: 30, stopLoss: 450.00,
-    riskAmount: 45, pnl: 105, rMultiple: 2.33,
-    setup: "VWAP Rejection",
-    entryReason: "Clean rejection from VWAP with red candle close and declining volume on the push",
-    exitReason: "Scaled out at 1R and 2R targets exactly as planned pre-market",
-    emotion: "Confident", marketCondition: "Trending Down",
-    mistakes: "None — executed the plan perfectly",
-    lessons: "Disciplined pre-trade planning leads to clean execution. Write the plan before the open.",
-    grade: "A",
+    id: 3, date: "2026-04-14", ticker: "ORCL", direction: "LONG",
+    entryPrice: 164.37, exitPrice: 162.00, shares: 3, stopLoss: 0,
+    riskAmount: 0, pnl: -7.13, rMultiple: 0,
+    setup: "Other",
+    entryReason: "", exitReason: "",
+    emotion: "Calm", marketCondition: "Choppy",
+    mistakes: "", lessons: "", grade: "B",
   },
   {
-    id: 4, date: "2026-04-07", ticker: "AAPL", direction: "LONG",
-    entryPrice: 192.00, exitPrice: 193.20, shares: 25, stopLoss: 191.00,
-    riskAmount: 25, pnl: 30, rMultiple: 1.2,
-    setup: "Opening Range Breakout",
-    entryReason: "Broke above 15-min opening range with above-average volume",
-    exitReason: "Closed early as momentum faded — took small profit instead of holding to target",
-    emotion: "Anxious", marketCondition: "Choppy",
-    mistakes: "Should have held to original target. Closed early due to anxiety about giving back gains.",
-    lessons: "Trust original target levels. Anxiety causes premature exits. Use a hard stop and walk away.",
-    grade: "B",
+    id: 4, date: "2026-04-13", ticker: "USO", direction: "LONG",
+    entryPrice: 132.00, exitPrice: 132.52, shares: 3.787, stopLoss: 0,
+    riskAmount: 0, pnl: 2.03, rMultiple: 0,
+    setup: "Other",
+    entryReason: "", exitReason: "",
+    emotion: "Calm", marketCondition: "Trending Up",
+    mistakes: "", lessons: "", grade: "B",
   },
   {
-    id: 5, date: "2026-04-08", ticker: "SPY", direction: "LONG",
-    entryPrice: 561.00, exitPrice: 559.50, shares: 40, stopLoss: 560.00,
-    riskAmount: 40, pnl: -60, rMultiple: -1.5,
-    setup: "Bull Flag",
-    entryReason: "Textbook bull flag on 5-min chart after strong opening move, waited for consolidation",
-    exitReason: "Flag broke down, hit stop loss as pre-planned",
-    emotion: "Calm", marketCondition: "Volatile",
-    mistakes: "Stop placement was too tight for the current volatility environment (VIX elevated)",
-    lessons: "Adjust stop widths based on ATR and current VIX. No shame in a planned loss executed cleanly.",
-    grade: "B",
+    id: 5, date: "2026-04-10", ticker: "TSM", direction: "LONG",
+    entryPrice: 377.06, exitPrice: 375.48, shares: 1.326, stopLoss: 0,
+    riskAmount: 0, pnl: -2.10, rMultiple: 0,
+    setup: "Other",
+    entryReason: "", exitReason: "",
+    emotion: "Calm", marketCondition: "Choppy",
+    mistakes: "", lessons: "", grade: "B",
   },
   {
-    id: 6, date: "2026-04-09", ticker: "TSLA", direction: "SHORT",
-    entryPrice: 254.00, exitPrice: 248.50, shares: 20, stopLoss: 256.00,
-    riskAmount: 40, pnl: 110, rMultiple: 2.75,
-    setup: "Reversal",
-    entryReason: "TSLA gapping down, failed to reclaim premarket high on three attempts, confirmation short",
-    exitReason: "Covered near LOD target, protected gains on small pullback",
-    emotion: "Confident", marketCondition: "Trending Down",
-    mistakes: "None",
-    lessons: "Failed breakout reversals on high-float names are high probability in weak tape.",
-    grade: "A",
+    id: 6, date: "2026-04-09", ticker: "USO", direction: "LONG",
+    entryPrice: 128.77, exitPrice: 129.02, shares: 7.764, stopLoss: 0,
+    riskAmount: 0, pnl: 2.00, rMultiple: 0,
+    setup: "Other",
+    entryReason: "", exitReason: "",
+    emotion: "Calm", marketCondition: "Trending Up",
+    mistakes: "", lessons: "", grade: "B",
   },
 ];
 
@@ -569,6 +552,201 @@ function applyLiveQuotes(holdings, quotes) {
 }
 
 /* ════════════════════════════════════════════
+   FIDELITY CSV IMPORT HELPERS
+   ════════════════════════════════════════════ */
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuotes = !inQuotes; }
+    else if (ch === "," && !inQuotes) { result.push(current.trim()); current = ""; }
+    else { current += ch; }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function toISODate(dateStr) {
+  // MM/DD/YYYY → YYYY-MM-DD
+  const parts = dateStr.trim().split("/");
+  if (parts.length === 3) return `${parts[2]}-${parts[0].padStart(2,"0")}-${parts[1].padStart(2,"0")}`;
+  return dateStr;
+}
+
+function parseFidelityCSV(text) {
+  const lines = text.split("\n");
+  let headerIdx = null;
+  const rawTrades = [];
+
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const cols = parseCSVLine(line);
+
+    // Detect header row
+    if (!headerIdx && cols.some(c => c.trim() === "Run Date")) {
+      headerIdx = {};
+      cols.forEach((c, i) => { headerIdx[c.trim()] = i; });
+      continue;
+    }
+    if (!headerIdx) continue;
+
+    const action  = cols[headerIdx["Action"]] || "";
+    const symbol  = (cols[headerIdx["Symbol"]] || "").trim();
+    const price   = parseFloat(cols[headerIdx["Price ($)"]] || 0);
+    const qty     = parseFloat(cols[headerIdx["Quantity"]] || 0);
+    const amount  = parseFloat(cols[headerIdx["Amount ($)"]] || 0);
+    const dateRaw = cols[headerIdx["Run Date"]] || "";
+
+    if (!symbol || !action.includes("YOU")) continue;
+    if (isNaN(price) || price === 0) continue;
+
+    const isBuy  = action.includes("YOU BOUGHT");
+    const isSell = action.includes("YOU SOLD");
+    if (!isBuy && !isSell) continue;
+
+    rawTrades.push({
+      date: toISODate(dateRaw),
+      symbol,
+      type: isBuy ? "BUY" : "SELL",
+      price: Math.abs(price),
+      qty: Math.abs(qty),
+      amount,
+    });
+  }
+
+  // Group by date + symbol
+  const groups = {};
+  for (const t of rawTrades) {
+    const key = `${t.date}|${t.symbol}`;
+    if (!groups[key]) groups[key] = { buys: [], sells: [], date: t.date, symbol: t.symbol };
+    groups[key][t.type === "BUY" ? "buys" : "sells"].push(t);
+  }
+
+  const entries = [];
+  for (const g of Object.values(groups)) {
+    if (!g.buys.length || !g.sells.length) continue; // skip non-round-trips
+
+    const totalBuyQty  = g.buys.reduce((s, t) => s + t.qty, 0);
+    const totalSellQty = g.sells.reduce((s, t) => s + t.qty, 0);
+    const avgEntry = g.buys.reduce((s, t) => s + t.price * t.qty, 0) / totalBuyQty;
+    const avgExit  = g.sells.reduce((s, t) => s + t.price * t.qty, 0) / totalSellQty;
+    const shares   = +Math.min(totalBuyQty, totalSellQty).toFixed(3);
+    // P/L from Amount column (most accurate — already net of any fees)
+    const pnl = +(g.buys.reduce((s, t) => s + t.amount, 0) + g.sells.reduce((s, t) => s + t.amount, 0)).toFixed(2);
+
+    entries.push({
+      id: Date.now() + Math.random(),
+      date: g.date,
+      ticker: g.symbol,
+      direction: "LONG",
+      entryPrice: +avgEntry.toFixed(2),
+      exitPrice: +avgExit.toFixed(2),
+      shares,
+      stopLoss: 0,
+      riskAmount: 0,
+      pnl,
+      rMultiple: 0,
+      setup: "Other",
+      entryReason: "", exitReason: "",
+      emotion: "Calm", marketCondition: "Trending Up",
+      mistakes: "", lessons: "", grade: "B",
+    });
+  }
+
+  return entries.sort((a, b) => b.date.localeCompare(a.date));
+}
+
+function FidelityImportForm({ onImport, onClose }) {
+  const [csv, setCsv] = useState("");
+  const [preview, setPreview] = useState(null);
+  const [error, setError] = useState("");
+
+  const handleParse = () => {
+    setError("");
+    if (!csv.trim()) { setError("Paste your Fidelity CSV text first."); return; }
+    const entries = parseFidelityCSV(csv);
+    if (!entries.length) { setError("No same-day round-trip trades found. Make sure you pasted the full CSV including the header row."); return; }
+    setPreview(entries);
+  };
+
+  const handleImport = () => { onImport(preview); onClose(); };
+
+  const inputStyle = { width: "100%", padding: "10px 12px", border: `1px solid ${COLORS.gray200}`, borderRadius: 8, fontSize: 13, outline: "none", fontFamily: "monospace", boxSizing: "border-box" };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+      <div style={{ background: COLORS.white, borderRadius: 16, padding: 32, width: 680, maxHeight: "92vh", overflow: "auto" }}>
+        <h3 style={{ margin: "0 0 8px", color: COLORS.primary, fontSize: 20, fontFamily: "'Instrument Serif', Georgia, serif" }}>Import from Fidelity CSV</h3>
+        <p style={{ margin: "0 0 16px", fontSize: 13, color: COLORS.gray500 }}>
+          In Fidelity: <strong>Accounts → History → Download</strong>. Open the CSV, select all, paste below.
+          Only same-day buy+sell round trips are imported as daytrading entries.
+        </p>
+
+        {!preview ? (
+          <>
+            <textarea
+              style={{ ...inputStyle, height: 240, resize: "vertical", fontFamily: "monospace", fontSize: 12 }}
+              value={csv}
+              onChange={e => setCsv(e.target.value)}
+              placeholder={"Run Date,Account,Account Number,Action,Symbol,...\n04/14/2026,\"Individual\",\"Z39444051\",\"YOU BOUGHT PROSHARES ULTRAPRO QQQ (TQQQ) (Cash)\",TQQQ,..."}
+            />
+            {error && <div style={{ marginTop: 8, color: COLORS.red, fontSize: 13 }}>{error}</div>}
+            <div style={{ display: "flex", gap: 10, marginTop: 16, justifyContent: "flex-end" }}>
+              <button onClick={onClose} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, background: COLORS.white, cursor: "pointer", fontWeight: 600, color: COLORS.gray600 }}>Cancel</button>
+              <button onClick={handleParse} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: COLORS.accent, color: COLORS.white, cursor: "pointer", fontWeight: 600 }}>Parse Trades</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div style={{ marginBottom: 12, fontSize: 13, color: COLORS.green, fontWeight: 600 }}>
+              Found {preview.length} round-trip trade{preview.length !== 1 ? "s" : ""}. Review before importing:
+            </div>
+            <div style={{ overflowX: "auto", marginBottom: 16 }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: `2px solid ${COLORS.gray200}` }}>
+                    {["Date","Ticker","Dir","Avg Entry","Avg Exit","Shares","P/L"].map(h => (
+                      <th key={h} style={{ textAlign: "left", padding: "8px 10px", color: COLORS.gray500, fontWeight: 600, fontSize: 11, textTransform: "uppercase" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {preview.map((e, i) => (
+                    <tr key={i} style={{ borderBottom: `1px solid ${COLORS.gray200}` }}>
+                      <td style={{ padding: "8px 10px", color: COLORS.gray600 }}>{e.date}</td>
+                      <td style={{ padding: "8px 10px", fontWeight: 700, color: COLORS.primary }}>{e.ticker}</td>
+                      <td style={{ padding: "8px 10px" }}>
+                        <span style={{ padding: "2px 8px", borderRadius: 5, fontSize: 11, fontWeight: 700, background: e.direction === "LONG" ? COLORS.greenBg : COLORS.redBg, color: e.direction === "LONG" ? COLORS.green : COLORS.red }}>{e.direction}</span>
+                      </td>
+                      <td style={{ padding: "8px 10px" }}>{fmtUSD(e.entryPrice)}</td>
+                      <td style={{ padding: "8px 10px" }}>{fmtUSD(e.exitPrice)}</td>
+                      <td style={{ padding: "8px 10px" }}>{e.shares}</td>
+                      <td style={{ padding: "8px 10px", fontWeight: 700, color: e.pnl >= 0 ? COLORS.green : COLORS.red }}>
+                        {e.pnl >= 0 ? "+" : ""}{fmtUSD(e.pnl)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div style={{ padding: "10px 14px", background: COLORS.accentFaint, borderRadius: 8, fontSize: 12, color: COLORS.gray600, marginBottom: 16 }}>
+              Stop loss, R-multiple, setup, emotions, and notes will be blank — click any entry after importing to fill them in.
+            </div>
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button onClick={() => setPreview(null)} style={{ padding: "10px 20px", borderRadius: 8, border: `1px solid ${COLORS.gray200}`, background: COLORS.white, cursor: "pointer", fontWeight: 600, color: COLORS.gray600 }}>Back</button>
+              <button onClick={handleImport} style={{ padding: "10px 20px", borderRadius: 8, border: "none", background: COLORS.green, color: COLORS.white, cursor: "pointer", fontWeight: 600 }}>Import {preview.length} Trade{preview.length !== 1 ? "s" : ""}</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════
    DAYTRADING JOURNAL COMPONENTS
    ════════════════════════════════════════════ */
 
@@ -853,8 +1031,9 @@ function RMultipleChart({ data }) {
   );
 }
 
-function DaytradingTab({ journal, onAddEntry, onDeleteEntry }) {
+function DaytradingTab({ journal, onAddEntry, onDeleteEntry, onImportEntries }) {
   const [showAddEntry, setShowAddEntry] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [filterGrade, setFilterGrade] = useState("All");
   const [filterDirection, setFilterDirection] = useState("All");
 
@@ -891,7 +1070,10 @@ function DaytradingTab({ journal, onAddEntry, onDeleteEntry }) {
             {journal.length} trades logged · {metrics.wins}W / {metrics.losses}L
           </p>
         </div>
-        <button onClick={() => setShowAddEntry(true)} style={actionBtn}>+ Log Trade</button>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={() => setShowImport(true)} style={{ ...actionBtn, background: "transparent" }}>Import Fidelity CSV</button>
+          <button onClick={() => setShowAddEntry(true)} style={actionBtn}>+ Log Trade</button>
+        </div>
       </div>
 
       {/* Performance Metrics */}
@@ -995,6 +1177,12 @@ function DaytradingTab({ journal, onAddEntry, onDeleteEntry }) {
           onClose={() => setShowAddEntry(false)}
         />
       )}
+      {showImport && (
+        <FidelityImportForm
+          onImport={(entries) => { onImportEntries(entries); setShowImport(false); }}
+          onClose={() => setShowImport(false)}
+        />
+      )}
     </div>
   );
 }
@@ -1059,6 +1247,12 @@ export default function PortfolioDashboard() {
   const deleteMemo = (id) => setMemos(prev => prev.filter(m => m.id !== id));
   const addJournalEntry = (e) => setJournal(prev => [e, ...prev]);
   const deleteJournalEntry = (id) => setJournal(prev => prev.filter(e => e.id !== id));
+  const importJournalEntries = (entries) => setJournal(prev => {
+    // Avoid duplicates: skip entries with same date+ticker already in journal
+    const existing = new Set(prev.map(e => `${e.date}|${e.ticker}`));
+    const fresh = entries.filter(e => !existing.has(`${e.date}|${e.ticker}`));
+    return [...fresh, ...prev];
+  });
 
   const btnStyle = (active) => ({
     padding: "10px 24px", borderRadius: 10, border: "none",
@@ -1186,6 +1380,7 @@ export default function PortfolioDashboard() {
             journal={journal}
             onAddEntry={addJournalEntry}
             onDeleteEntry={deleteJournalEntry}
+            onImportEntries={importJournalEntries}
           />
         )}
 
