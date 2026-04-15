@@ -204,29 +204,28 @@ function calcDaytradeMetrics(entries) {
   return { winRate, profitFactor, expectancy, avgR, maxDrawdown: maxDD, totalPnl: cumPnl, wins: winners.length, losses: losers.length };
 }
 
-function getCumPnlData(entries) {
-  let cum = 0;
-  return [...entries].sort((a, b) => a.date.localeCompare(b.date)).map(e => {
-    cum += e.pnl;
-    return { date: e.date, cumPnl: +cum.toFixed(2), pnl: +e.pnl.toFixed(2) };
-  });
-}
+function getAccountValueData(entries, baseValue) {
+  if (!entries.length) return [];
+  const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date));
 
-function getRMultipleData(entries) {
-  const buckets = [
-    { name: "< -2R", min: -Infinity, max: -2 },
-    { name: "-2 to -1R", min: -2, max: -1 },
-    { name: "-1 to 0R", min: -1, max: 0 },
-    { name: "0 to 1R", min: 0, max: 1 },
-    { name: "1 to 2R", min: 1, max: 2 },
-    { name: "> 2R", min: 2, max: Infinity },
-  ].map(b => ({ ...b, count: 0 }));
-  entries.forEach(e => {
-    const r = e.rMultiple || 0;
-    const b = buckets.find(b => r >= b.min && r < b.max) || buckets[buckets.length - 1];
-    b.count++;
-  });
-  return buckets.map(b => ({ name: b.name, count: b.count, positive: b.min >= 0 }));
+  // Group P/L by exit date
+  const byDate = {};
+  sorted.forEach(e => { byDate[e.date] = (byDate[e.date] || 0) + e.pnl; });
+
+  // Starting point: one calendar day before first trade
+  const firstTs = new Date(sorted[0].date + "T12:00:00").getTime();
+  const points = [{ timestamp: firstTs - 86400000, accountValue: +baseValue.toFixed(2), pnl: 0 }];
+
+  let cum = 0;
+  for (const [date, pnl] of Object.entries(byDate).sort()) {
+    cum += pnl;
+    points.push({
+      timestamp: new Date(date + "T12:00:00").getTime(),
+      accountValue: +(baseValue + cum).toFixed(2),
+      pnl: +pnl.toFixed(2),
+    });
+  }
+  return points;
 }
 
 /* ── shared UI ── */
@@ -863,12 +862,8 @@ function JournalEntryCard({ entry, onDelete }) {
           {/* Shares */}
           <span style={{ fontSize: 13, color: COLORS.gray500 }}>{entry.shares} sh</span>
           {/* P/L */}
-          <span style={{ fontWeight: 700, fontSize: 15, color: pnlColor, minWidth: 80, textAlign: "right" }}>
+          <span style={{ fontWeight: 700, fontSize: 15, color: pnlColor, minWidth: 90, textAlign: "right" }}>
             {entry.pnl >= 0 ? "+" : ""}{fmtUSD(entry.pnl)}
-          </span>
-          {/* R-multiple */}
-          <span style={{ fontWeight: 700, fontSize: 14, color: rColor, minWidth: 54, textAlign: "right" }}>
-            {(entry.rMultiple || 0) >= 0 ? "+" : ""}{(entry.rMultiple || 0).toFixed(2)}R
           </span>
           {/* Grade */}
           <span style={{ fontWeight: 800, fontSize: 14, color: gradeColor, width: 24, textAlign: "center" }}>{entry.grade}</span>
@@ -1075,53 +1070,54 @@ function AddJournalEntryForm({ onAdd, onClose }) {
   );
 }
 
-function CumPnlChart({ data }) {
-  if (!data.length) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 240, color: COLORS.gray400 }}>No trades yet</div>;
+function AccountValueChart({ data }) {
+  if (!data.length) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 260, color: COLORS.gray400 }}>No trades yet</div>;
+  const vals = data.map(d => d.accountValue);
+  const minVal = Math.min(...vals);
+  const maxVal = Math.max(...vals);
+  const pad = Math.max((maxVal - minVal) * 0.15, 20);
+  const fmtTs = ts => { const d = new Date(ts); return (d.getMonth()+1)+"/"+d.getDate(); };
   return (
-    <ResponsiveContainer width="100%" height={240}>
+    <ResponsiveContainer width="100%" height={260}>
       <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray200} />
-        <XAxis dataKey="date" tick={{ fontSize: 11, fill: COLORS.gray400 }} tickFormatter={v => { const d = new Date(v + "T00:00:00"); return (d.getMonth()+1)+"/"+d.getDate(); }} interval={Math.max(0, Math.floor(data.length / 7) - 1)} />
-        <YAxis tick={{ fontSize: 11, fill: COLORS.gray400 }} tickFormatter={v => "$" + v} />
-        <Tooltip formatter={(v, n) => [fmtUSD(v), n === "cumPnl" ? "Cumulative P/L" : "Trade P/L"]} labelFormatter={v => v} contentStyle={{ borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }} />
-        <ReferenceLine y={0} stroke={COLORS.gray300} strokeDasharray="4 2" />
-        <Line type="monotone" dataKey="cumPnl" stroke={COLORS.accent} strokeWidth={2.5} dot={{ r: 3, fill: COLORS.accent }} name="cumPnl" />
+        <XAxis
+          dataKey="timestamp"
+          type="number"
+          scale="time"
+          domain={["dataMin", "dataMax"]}
+          tick={{ fontSize: 11, fill: COLORS.gray400 }}
+          tickFormatter={fmtTs}
+          tickCount={Math.min(data.length + 1, 8)}
+        />
+        <YAxis
+          tick={{ fontSize: 11, fill: COLORS.gray400 }}
+          tickFormatter={v => "$" + v.toLocaleString()}
+          domain={[Math.floor(minVal - pad), Math.ceil(maxVal + pad)]}
+          width={72}
+        />
+        <Tooltip
+          labelFormatter={ts => new Date(ts).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          formatter={(v, n) => [fmtUSD(v), n === "accountValue" ? "Account Value" : "Day P/L"]}
+          contentStyle={{ borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }}
+        />
+        <Line type="monotone" dataKey="accountValue" stroke={COLORS.accent} strokeWidth={2.5} dot={{ r: 4, fill: COLORS.accent }} activeDot={{ r: 6 }} name="accountValue" />
       </LineChart>
     </ResponsiveContainer>
   );
 }
 
-function RMultipleChart({ data }) {
-  if (!data.every(d => d.count === 0) === false) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200, color: COLORS.gray400 }}>No trades yet</div>;
-  return (
-    <ResponsiveContainer width="100%" height={200}>
-      <BarChart data={data} barSize={28}>
-        <CartesianGrid strokeDasharray="3 3" stroke={COLORS.gray200} vertical={false} />
-        <XAxis dataKey="name" tick={{ fontSize: 10, fill: COLORS.gray500 }} />
-        <YAxis tick={{ fontSize: 11, fill: COLORS.gray400 }} allowDecimals={false} />
-        <Tooltip formatter={(v) => [v + " trades", "Count"]} contentStyle={{ borderRadius: 8, border: `1px solid ${COLORS.gray200}`, fontSize: 13 }} />
-        <Bar dataKey="count" radius={[4,4,0,0]}>
-          {data.map((d, i) => <Cell key={i} fill={d.positive ? COLORS.green : COLORS.red} fillOpacity={0.8} />)}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  );
-}
-
-function DaytradingTab({ journal, onAddEntry, onDeleteEntry, onImportEntries }) {
+function DaytradingTab({ journal, onAddEntry, onDeleteEntry, onImportEntries, accountBaseValue, onSetAccountBaseValue }) {
   const [showAddEntry, setShowAddEntry] = useState(false);
   const [showImport, setShowImport] = useState(false);
-  const [filterGrade, setFilterGrade] = useState("All");
-  const [filterDirection, setFilterDirection] = useState("All");
+  const [editingBase, setEditingBase] = useState(false);
+  const [baseInput, setBaseInput] = useState(String(accountBaseValue));
 
   const metrics = calcDaytradeMetrics(journal);
-  const cumPnlData = getCumPnlData(journal);
-  const rMultipleData = getRMultipleData(journal);
+  const accountValueData = getAccountValueData(journal, accountBaseValue);
+  const currentAccountValue = accountBaseValue + metrics.totalPnl;
 
-  const filtered = [...journal]
-    .filter(e => filterGrade === "All" || e.grade === filterGrade)
-    .filter(e => filterDirection === "All" || e.direction === filterDirection)
-    .sort((a, b) => b.date.localeCompare(a.date));
+  const sorted = [...journal].sort((a, b) => b.date.localeCompare(a.date));
 
   const actionBtn = {
     padding: "10px 20px", borderRadius: 10, border: `2px solid ${COLORS.accent}`,
@@ -1129,13 +1125,13 @@ function DaytradingTab({ journal, onAddEntry, onDeleteEntry, onImportEntries }) 
     fontWeight: 700, fontSize: 13, fontFamily: "'Plus Jakarta Sans', sans-serif",
   };
 
-  const filterBtn = (active) => ({
-    padding: "5px 12px", borderRadius: 6, border: "none", fontSize: 12, fontWeight: 700,
-    cursor: "pointer", background: active ? COLORS.accent : "transparent",
-    color: active ? COLORS.white : COLORS.gray500,
-  });
-
   const profitFactorDisplay = metrics.profitFactor === 999 ? "∞" : metrics.profitFactor.toFixed(2);
+
+  const commitBase = () => {
+    const v = parseFloat(baseInput);
+    if (!isNaN(v) && v >= 0) onSetAccountBaseValue(v);
+    setEditingBase(false);
+  };
 
   return (
     <div>
@@ -1148,18 +1144,27 @@ function DaytradingTab({ journal, onAddEntry, onDeleteEntry, onImportEntries }) 
           </p>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={() => setShowImport(true)} style={{ ...actionBtn, background: "transparent" }}>Import Fidelity CSV</button>
+          <button onClick={() => setShowImport(true)} style={{ ...actionBtn, background: "transparent", color: COLORS.accent }}>Import Fidelity CSV</button>
           <button onClick={() => setShowAddEntry(true)} style={actionBtn}>+ Log Trade</button>
         </div>
       </div>
 
-      {/* Performance Metrics */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 16, marginBottom: 24 }}>
+      {/* Performance Metrics — 5 cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 16, marginBottom: 24 }}>
+        <Card>
+          <MetricCard
+            label="Account Value"
+            value={fmtUSD(currentAccountValue)}
+            color={metrics.totalPnl >= 0 ? COLORS.green : COLORS.red}
+            sub={(metrics.totalPnl >= 0 ? "+" : "") + fmtUSD(metrics.totalPnl) + " total P/L"}
+          />
+        </Card>
         <Card>
           <MetricCard
             label="Win Rate"
             value={journal.length ? (metrics.winRate * 100).toFixed(0) + "%" : "—"}
             color={metrics.winRate >= 0.5 ? COLORS.green : COLORS.red}
+            sub={`${metrics.wins}W / ${metrics.losses}L`}
           />
         </Card>
         <Card>
@@ -1174,13 +1179,7 @@ function DaytradingTab({ journal, onAddEntry, onDeleteEntry, onImportEntries }) 
             label="Expectancy"
             value={journal.length ? (metrics.expectancy >= 0 ? "+" : "") + fmtUSD(metrics.expectancy) : "—"}
             color={metrics.expectancy >= 0 ? COLORS.green : COLORS.red}
-          />
-        </Card>
-        <Card>
-          <MetricCard
-            label="Avg R-Multiple"
-            value={journal.length ? (metrics.avgR >= 0 ? "+" : "") + metrics.avgR.toFixed(2) + "R" : "—"}
-            color={metrics.avgR >= 0 ? COLORS.green : COLORS.red}
+            sub="avg per trade"
           />
         </Card>
         <Card>
@@ -1190,59 +1189,49 @@ function DaytradingTab({ journal, onAddEntry, onDeleteEntry, onImportEntries }) 
             color={metrics.maxDrawdown > 0 ? COLORS.red : COLORS.gray500}
           />
         </Card>
-        <Card>
-          <MetricCard
-            label="Total P/L"
-            value={journal.length ? (metrics.totalPnl >= 0 ? "+" : "") + fmtUSD(metrics.totalPnl) : "—"}
-            color={metrics.totalPnl >= 0 ? COLORS.green : COLORS.red}
-          />
-        </Card>
       </div>
 
-      {/* Charts Row */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20, marginBottom: 24 }}>
-        <Card>
-          <h3 style={{ margin: "0 0 16px", color: COLORS.primary, fontSize: 18, fontFamily: "'Instrument Serif', Georgia, serif" }}>Cumulative P/L</h3>
-          <CumPnlChart data={cumPnlData} />
-        </Card>
-        <Card>
-          <h3 style={{ margin: "0 0 16px", color: COLORS.primary, fontSize: 18, fontFamily: "'Instrument Serif', Georgia, serif" }}>R-Multiple Distribution</h3>
-          <RMultipleChart data={rMultipleData} />
-          <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: COLORS.gray500 }}>
-              <div style={{ width: 10, height: 10, borderRadius: 2, background: COLORS.green }} /> Winners
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: COLORS.gray500 }}>
-              <div style={{ width: 10, height: 10, borderRadius: 2, background: COLORS.red }} /> Losers
-            </div>
+      {/* Account Value Chart — full width */}
+      <Card style={{ marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+          <h3 style={{ margin: 0, color: COLORS.primary, fontSize: 18, fontFamily: "'Instrument Serif', Georgia, serif" }}>Account Value</h3>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontSize: 12, color: COLORS.gray500 }}>Starting value:</span>
+            {editingBase ? (
+              <>
+                <input
+                  autoFocus
+                  type="number"
+                  value={baseInput}
+                  onChange={e => setBaseInput(e.target.value)}
+                  onBlur={commitBase}
+                  onKeyDown={e => e.key === "Enter" && commitBase()}
+                  style={{ width: 90, padding: "4px 8px", border: `1px solid ${COLORS.accent}`, borderRadius: 6, fontSize: 13, outline: "none" }}
+                />
+              </>
+            ) : (
+              <button onClick={() => { setBaseInput(String(accountBaseValue)); setEditingBase(true); }}
+                style={{ background: COLORS.accentFaint, border: `1px solid ${COLORS.accentPale}`, borderRadius: 6, padding: "4px 10px", fontSize: 13, fontWeight: 600, color: COLORS.accent, cursor: "pointer" }}>
+                {fmtUSD(accountBaseValue)}
+              </button>
+            )}
           </div>
-        </Card>
-      </div>
+        </div>
+        <AccountValueChart data={accountValueData} />
+      </Card>
 
       {/* Journal Entries */}
       <Card style={{ marginBottom: 24 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <h3 style={{ margin: 0, color: COLORS.primary, fontSize: 18, fontFamily: "'Instrument Serif', Georgia, serif" }}>Trade Journal</h3>
-          <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-            <div style={{ display: "flex", gap: 3, background: COLORS.gray100, borderRadius: 8, padding: 3 }}>
-              {["All","LONG","SHORT"].map(d => (
-                <button key={d} onClick={() => setFilterDirection(d)} style={filterBtn(filterDirection === d)}>{d}</button>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: 3, background: COLORS.gray100, borderRadius: 8, padding: 3 }}>
-              {["All",...GRADES].map(g => (
-                <button key={g} onClick={() => setFilterGrade(g)} style={{ ...filterBtn(filterGrade === g), color: filterGrade === g ? COLORS.white : (g === "All" ? COLORS.gray500 : GRADE_COLORS[g]) }}>{g}</button>
-              ))}
-            </div>
-          </div>
         </div>
-        <div style={{ padding: "0 0" }}>
-          {filtered.map(entry => (
+        <div>
+          {sorted.map(entry => (
             <JournalEntryCard key={entry.id} entry={entry} onDelete={onDeleteEntry} />
           ))}
-          {!filtered.length && (
+          {!sorted.length && (
             <div style={{ textAlign: "center", padding: "40px 0", color: COLORS.gray400 }}>
-              {journal.length ? "No trades match the current filter." : "No trades logged yet. Click '+ Log Trade' to get started."}
+              No trades logged yet. Click '+ Log Trade' to get started.
             </div>
           )}
         </div>
@@ -1272,6 +1261,7 @@ export default function PortfolioDashboard() {
   const [portfolios, setPortfolios] = useState(DEFAULT_PORTFOLIO);
   const [memos, setMemos] = useState(DEFAULT_MEMOS);
   const [journal, setJournal] = useState(DEFAULT_JOURNAL);
+  const [accountBaseValue, setAccountBaseValue] = useState(1000);
   const [showAddHolding, setShowAddHolding] = useState(false);
   const [showAddTrade, setShowAddTrade] = useState(false);
   const [showAddMemo, setShowAddMemo] = useState(false);
@@ -1286,6 +1276,7 @@ export default function PortfolioDashboard() {
         if (parsed.portfolios) setPortfolios(parsed.portfolios);
         if (parsed.memos) setMemos(parsed.memos);
         if (parsed.journal) setJournal(parsed.journal);
+        if (parsed.accountBaseValue != null) setAccountBaseValue(parsed.accountBaseValue);
       }
     } catch (e) { /* first load */ }
     setLoaded(true);
@@ -1294,7 +1285,8 @@ export default function PortfolioDashboard() {
   useEffect(() => {
     if (!loaded) return;
     try {
-      localStorage.setItem("ts8-portfolio-data", JSON.stringify({ portfolios, memos, journal }));
+      localStorage.setItem("ts8-portfolio-data", JSON.stringify({ portfolios, memos, journal, accountBaseValue }));
+
     } catch (e) { console.error("Save error:", e); }
   }, [portfolios, memos, journal, loaded]);
 
@@ -1458,6 +1450,8 @@ export default function PortfolioDashboard() {
             onAddEntry={addJournalEntry}
             onDeleteEntry={deleteJournalEntry}
             onImportEntries={importJournalEntries}
+            accountBaseValue={accountBaseValue}
+            onSetAccountBaseValue={setAccountBaseValue}
           />
         )}
 
