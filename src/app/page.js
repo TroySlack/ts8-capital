@@ -29,7 +29,7 @@ const COLORS = {
 };
 
 const SECTOR_COLORS = ["#2563eb","#0891b2","#059669","#d97706","#dc2626","#7c3aed","#db2777","#0d9488","#4f46e5","#ca8a04","#6366f1"];
-const TABS = ["TS-8 Fund", "Daytrading", "Thesis / Analyst"];
+const TABS = ["TS-8 Fund", "Short-term", "Thesis / Analyst"];
 
 const EMOTIONS = ["Calm","Confident","Anxious","Fearful","Greedy","FOMO","Frustrated","Euphoric","Bored"];
 const MARKET_CONDITIONS = ["Trending Up","Trending Down","Choppy","Volatile","Range-bound","Gap Up","Gap Down"];
@@ -49,60 +49,100 @@ const DEFAULT_PORTFOLIO = {
   "Daytrading": { accountValue: 0, holdings: [], trades: [] },
 };
 
-// Real trades imported from Fidelity — same-day round trips only (daytrading)
+// Real trades from Fidelity — all short-term realized gains/losses (same-day + multi-day holds)
 const DEFAULT_JOURNAL = [
+  // ── 04/14 same-day trades ──
   {
-    id: 1, date: "2026-04-14", ticker: "TQQQ", direction: "LONG",
+    id: 1, date: "2026-04-14", entryDate: "2026-04-14", holdingDays: 0,
+    ticker: "TQQQ", direction: "LONG",
     entryPrice: 53.03, exitPrice: 53.24, shares: 4.67, stopLoss: 0,
-    riskAmount: 0, pnl: 0.98, rMultiple: 0,
-    setup: "Other",
-    entryReason: "", exitReason: "",
-    emotion: "Calm", marketCondition: "Trending Up",
+    riskAmount: 0, pnl: 0.98, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Trending Up",
     mistakes: "", lessons: "", grade: "B",
   },
   {
-    id: 2, date: "2026-04-14", ticker: "QQQ", direction: "LONG",
+    id: 2, date: "2026-04-14", entryDate: "2026-04-14", holdingDays: 0,
+    ticker: "QQQ", direction: "LONG",
     entryPrice: 626.60, exitPrice: 627.25, shares: 0.8, stopLoss: 0,
-    riskAmount: 0, pnl: 0.52, rMultiple: 0,
-    setup: "Other",
-    entryReason: "", exitReason: "",
-    emotion: "Calm", marketCondition: "Trending Up",
+    riskAmount: 0, pnl: 0.52, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Trending Up",
     mistakes: "", lessons: "", grade: "B",
   },
   {
-    id: 3, date: "2026-04-14", ticker: "ORCL", direction: "LONG",
+    id: 3, date: "2026-04-14", entryDate: "2026-04-14", holdingDays: 0,
+    ticker: "ORCL", direction: "LONG",
     entryPrice: 164.37, exitPrice: 162.00, shares: 3, stopLoss: 0,
-    riskAmount: 0, pnl: -7.13, rMultiple: 0,
-    setup: "Other",
-    entryReason: "", exitReason: "",
-    emotion: "Calm", marketCondition: "Choppy",
+    riskAmount: 0, pnl: -7.13, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Choppy",
     mistakes: "", lessons: "", grade: "B",
   },
+  // ── 04/14 multi-day: VTI bought 04/06, held 8 days ──
   {
-    id: 4, date: "2026-04-13", ticker: "USO", direction: "LONG",
+    id: 4, date: "2026-04-14", entryDate: "2026-04-06", holdingDays: 8,
+    ticker: "VTI", direction: "LONG",
+    entryPrice: 324.18, exitPrice: 342.32, shares: 1.542, stopLoss: 0,
+    riskAmount: 0, pnl: 27.98, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Trending Up",
+    mistakes: "", lessons: "", grade: "B",
+  },
+  // ── 04/13 same-day ──
+  {
+    id: 5, date: "2026-04-13", entryDate: "2026-04-13", holdingDays: 0,
+    ticker: "USO", direction: "LONG",
     entryPrice: 132.00, exitPrice: 132.52, shares: 3.787, stopLoss: 0,
-    riskAmount: 0, pnl: 2.03, rMultiple: 0,
-    setup: "Other",
-    entryReason: "", exitReason: "",
-    emotion: "Calm", marketCondition: "Trending Up",
+    riskAmount: 0, pnl: 2.03, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Trending Up",
     mistakes: "", lessons: "", grade: "B",
   },
+  // ── 04/10 same-day ──
   {
-    id: 5, date: "2026-04-10", ticker: "TSM", direction: "LONG",
+    id: 6, date: "2026-04-10", entryDate: "2026-04-10", holdingDays: 0,
+    ticker: "TSM", direction: "LONG",
     entryPrice: 377.06, exitPrice: 375.48, shares: 1.326, stopLoss: 0,
-    riskAmount: 0, pnl: -2.10, rMultiple: 0,
-    setup: "Other",
-    entryReason: "", exitReason: "",
-    emotion: "Calm", marketCondition: "Choppy",
+    riskAmount: 0, pnl: -2.10, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Choppy",
+    mistakes: "", lessons: "", grade: "B",
+  },
+  // ── 04/09 same-day ──
+  {
+    id: 7, date: "2026-04-09", entryDate: "2026-04-09", holdingDays: 0,
+    ticker: "USO", direction: "LONG",
+    entryPrice: 128.77, exitPrice: 129.02, shares: 7.764, stopLoss: 0,
+    riskAmount: 0, pnl: 2.00, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Trending Up",
+    mistakes: "", lessons: "", grade: "B",
+  },
+  // ── 04/08 multi-day closes: MU/LULU/META/CHWY bought ~03/30 ──
+  {
+    id: 8, date: "2026-04-08", entryDate: "2026-03-30", holdingDays: 9,
+    ticker: "MU", direction: "LONG",
+    entryPrice: 378.38, exitPrice: 415.49, shares: 1.347, stopLoss: 0,
+    riskAmount: 0, pnl: 49.99, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Trending Up",
     mistakes: "", lessons: "", grade: "B",
   },
   {
-    id: 6, date: "2026-04-09", ticker: "USO", direction: "LONG",
-    entryPrice: 128.77, exitPrice: 129.02, shares: 7.764, stopLoss: 0,
-    riskAmount: 0, pnl: 2.00, rMultiple: 0,
-    setup: "Other",
-    entryReason: "", exitReason: "",
-    emotion: "Calm", marketCondition: "Trending Up",
+    id: 9, date: "2026-04-08", entryDate: "2026-03-30", holdingDays: 9,
+    ticker: "LULU", direction: "LONG",
+    entryPrice: 147.16, exitPrice: 161.24, shares: 0.013, stopLoss: 0,
+    riskAmount: 0, pnl: 0.19, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Trending Up",
+    mistakes: "", lessons: "", grade: "B",
+  },
+  {
+    id: 10, date: "2026-04-08", entryDate: "2026-03-30", holdingDays: 9,
+    ticker: "META", direction: "LONG",
+    entryPrice: 538.77, exitPrice: 603.57, shares: 0.003, stopLoss: 0,
+    riskAmount: 0, pnl: 0.19, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Trending Up",
+    mistakes: "", lessons: "", grade: "B",
+  },
+  {
+    id: 11, date: "2026-04-08", entryDate: "2026-03-30", holdingDays: 9,
+    ticker: "CHWY", direction: "LONG",
+    entryPrice: 26.38, exitPrice: 26.72, shares: 0.075, stopLoss: 0,
+    riskAmount: 0, pnl: 0.02, rMultiple: 0, setup: "Other",
+    entryReason: "", exitReason: "", emotion: "Calm", marketCondition: "Trending Up",
     mistakes: "", lessons: "", grade: "B",
   },
 ];
@@ -585,7 +625,6 @@ function parseFidelityCSV(text) {
     if (!line.trim()) continue;
     const cols = parseCSVLine(line);
 
-    // Detect header row
     if (!headerIdx && cols.some(c => c.trim() === "Run Date")) {
       headerIdx = {};
       cols.forEach((c, i) => { headerIdx[c.trim()] = i; });
@@ -617,43 +656,71 @@ function parseFidelityCSV(text) {
     });
   }
 
-  // Group by date + symbol
-  const groups = {};
-  for (const t of rawTrades) {
-    const key = `${t.date}|${t.symbol}`;
-    if (!groups[key]) groups[key] = { buys: [], sells: [], date: t.date, symbol: t.symbol };
-    groups[key][t.type === "BUY" ? "buys" : "sells"].push(t);
-  }
+  // Sort chronologically so FIFO works correctly
+  rawTrades.sort((a, b) => a.date.localeCompare(b.date));
 
+  // FIFO matching: group by symbol, match sells against oldest buy lots
+  const lotsBySymbol = {}; // symbol → [{date, price, qty, amount}]
   const entries = [];
-  for (const g of Object.values(groups)) {
-    if (!g.buys.length || !g.sells.length) continue; // skip non-round-trips
 
-    const totalBuyQty  = g.buys.reduce((s, t) => s + t.qty, 0);
-    const totalSellQty = g.sells.reduce((s, t) => s + t.qty, 0);
-    const avgEntry = g.buys.reduce((s, t) => s + t.price * t.qty, 0) / totalBuyQty;
-    const avgExit  = g.sells.reduce((s, t) => s + t.price * t.qty, 0) / totalSellQty;
-    const shares   = +Math.min(totalBuyQty, totalSellQty).toFixed(3);
-    // P/L from Amount column (most accurate — already net of any fees)
-    const pnl = +(g.buys.reduce((s, t) => s + t.amount, 0) + g.sells.reduce((s, t) => s + t.amount, 0)).toFixed(2);
+  for (const t of rawTrades) {
+    if (!lotsBySymbol[t.symbol]) lotsBySymbol[t.symbol] = [];
+    const lots = lotsBySymbol[t.symbol];
 
-    entries.push({
-      id: Date.now() + Math.random(),
-      date: g.date,
-      ticker: g.symbol,
-      direction: "LONG",
-      entryPrice: +avgEntry.toFixed(2),
-      exitPrice: +avgExit.toFixed(2),
-      shares,
-      stopLoss: 0,
-      riskAmount: 0,
-      pnl,
-      rMultiple: 0,
-      setup: "Other",
-      entryReason: "", exitReason: "",
-      emotion: "Calm", marketCondition: "Trending Up",
-      mistakes: "", lessons: "", grade: "B",
-    });
+    if (t.type === "BUY") {
+      lots.push({ date: t.date, price: t.price, qty: t.qty, amount: t.amount });
+    } else {
+      // Match this sell against oldest lots (FIFO)
+      let remaining = t.qty;
+      let costBasis = 0;
+      let proceeds = Math.abs(t.amount); // use Fidelity's net amount (fees already deducted)
+      let entryDate = null;
+      let matchedQty = 0;
+      const usedAmounts = [];
+
+      while (remaining > 0.0001 && lots.length > 0) {
+        const lot = lots[0];
+        const used = Math.min(lot.qty, remaining);
+        const lotFrac = used / lot.qty;
+
+        if (!entryDate) entryDate = lot.date;
+        costBasis += used * lot.price;
+        matchedQty += used;
+        usedAmounts.push(lot.amount * lotFrac);
+
+        lot.qty -= used;
+        remaining -= used;
+        if (lot.qty < 0.0001) lots.shift();
+      }
+
+      if (matchedQty < 0.0001 || !entryDate) continue; // no matching buy found in this export
+
+      const avgEntry = costBasis / matchedQty;
+      const avgExit  = t.price;
+      // P/L = proceeds (from Fidelity amount) minus proportional cost
+      const costFromAmounts = usedAmounts.reduce((s, a) => s + a, 0); // negative values
+      const pnl = +(proceeds + costFromAmounts).toFixed(2); // proceeds positive, costs negative
+
+      const holdingMs = new Date(t.date) - new Date(entryDate);
+      const holdingDays = Math.max(0, Math.round(holdingMs / 86400000));
+
+      entries.push({
+        id: Date.now() + Math.random(),
+        date: t.date,
+        entryDate,
+        holdingDays,
+        ticker: t.symbol,
+        direction: "LONG",
+        entryPrice: +avgEntry.toFixed(2),
+        exitPrice: +avgExit.toFixed(2),
+        shares: +matchedQty.toFixed(3),
+        stopLoss: 0, riskAmount: 0, pnl, rMultiple: 0,
+        setup: "Other",
+        entryReason: "", exitReason: "",
+        emotion: "Calm", marketCondition: "Trending Up",
+        mistakes: "", lessons: "", grade: "B",
+      });
+    }
   }
 
   return entries.sort((a, b) => b.date.localeCompare(a.date));
@@ -779,8 +846,12 @@ function JournalEntryCard({ entry, onDelete }) {
           </span>
           {/* Ticker */}
           <span style={{ fontWeight: 800, fontSize: 16, color: COLORS.primary }}>{entry.ticker}</span>
-          {/* Date */}
-          <span style={{ fontSize: 13, color: COLORS.gray400 }}>{entry.date}</span>
+          {/* Date range / holding period */}
+          <span style={{ fontSize: 13, color: COLORS.gray400 }}>
+            {entry.holdingDays === 0
+              ? entry.date + " · Day Trade"
+              : (entry.entryDate || entry.date) + " → " + entry.date + ` · ${entry.holdingDays}d`}
+          </span>
           {/* Setup */}
           <span style={{ fontSize: 12, color: COLORS.gray500, background: COLORS.gray100, padding: "2px 8px", borderRadius: 6 }}>{entry.setup}</span>
           {/* Spacer */}
@@ -861,7 +932,7 @@ function JournalEntryCard({ entry, onDelete }) {
 function AddJournalEntryForm({ onAdd, onClose }) {
   const today = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({
-    date: today, ticker: "", direction: "LONG",
+    entryDate: today, date: today, ticker: "", direction: "LONG",
     entryPrice: "", exitPrice: "", shares: "", stopLoss: "",
     setup: "Bull Flag", entryReason: "", exitReason: "",
     emotion: "Calm", marketCondition: "Trending Up",
@@ -891,9 +962,14 @@ function AddJournalEntryForm({ onAdd, onClose }) {
 
   const submit = () => {
     if (!form.ticker || !form.entryPrice || !form.exitPrice || !form.shares) return;
+    const entryDate = form.entryDate || form.date;
+    const holdingMs = new Date(form.date) - new Date(entryDate);
+    const holdingDays = Math.max(0, Math.round(holdingMs / 86400000));
     onAdd({
       id: Date.now(),
       date: form.date,
+      entryDate,
+      holdingDays,
       ticker: form.ticker.toUpperCase(),
       direction: form.direction,
       entryPrice: parseFloat(form.entryPrice),
@@ -927,9 +1003,10 @@ function AddJournalEntryForm({ onAdd, onClose }) {
       <div style={{ background: COLORS.white, borderRadius: 16, padding: 32, width: 640, maxHeight: "92vh", overflow: "auto" }}>
         <h3 style={{ margin: "0 0 20px", color: COLORS.primary, fontSize: 20, fontFamily: "'Instrument Serif', Georgia, serif" }}>Log Journal Entry</h3>
 
-        {/* Row 1: date, ticker, direction */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
-          <div><label style={labelStyle}>Date</label><input style={inputStyle} type="date" value={form.date} onChange={handle("date")} /></div>
+        {/* Row 1: entry date, exit date, ticker, direction */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 14, marginBottom: 14 }}>
+          <div><label style={labelStyle}>Entry Date</label><input style={inputStyle} type="date" value={form.entryDate} onChange={handle("entryDate")} /></div>
+          <div><label style={labelStyle}>Exit Date</label><input style={inputStyle} type="date" value={form.date} onChange={handle("date")} /></div>
           <div><label style={labelStyle}>Ticker</label><input style={inputStyle} value={form.ticker} onChange={handle("ticker")} placeholder="SPY" /></div>
           <div><label style={labelStyle}>Direction</label>
             <select style={{ ...inputStyle, cursor: "pointer" }} value={form.direction} onChange={handle("direction")}>
@@ -1065,9 +1142,9 @@ function DaytradingTab({ journal, onAddEntry, onDeleteEntry, onImportEntries }) 
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
-          <h2 style={{ margin: 0, color: COLORS.primary, fontSize: 28, fontFamily: "'Instrument Serif', Georgia, serif" }}>Daytrading Journal</h2>
+          <h2 style={{ margin: 0, color: COLORS.primary, fontSize: 28, fontFamily: "'Instrument Serif', Georgia, serif" }}>Short-term Holdings Journal</h2>
           <p style={{ margin: "6px 0 0", color: COLORS.gray500, fontSize: 14 }}>
-            {journal.length} trades logged · {metrics.wins}W / {metrics.losses}L
+            {journal.length} closed positions · {metrics.wins}W / {metrics.losses}L · all held under 1 year
           </p>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
